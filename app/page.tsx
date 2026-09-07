@@ -2,17 +2,66 @@
 
 import { useState } from 'react';
 
+interface AuspiciousDay {
+  date: string;
+  tithi: string;
+  nakshatra: string;
+  is_auspicious: boolean;
+}
+
+interface CalculationResponse {
+  event: string;
+  range: string;
+  auspicious_days: AuspiciousDay[];
+}
+
 export default function SaathCalculator() {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<CalculationResponse | null>(null);
   const [error, setError] = useState('');
+  
+  // Controlled states for real-time validation
+  const [startDate, setStartDate] = useState('2026-09-01');
+  const [endDate, setEndDate] = useState('2026-10-31');
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+
+  const eventMetadata: Record<string, { title: string; subtitle: string; icon: string; description: string }> = {
+    khandar: {
+      title: 'Khandar (Marriage)',
+      subtitle: 'Vivah Muhurat aligned with celestial alignment',
+      icon: '❀',
+      description: 'In the Kashmiri Pandit tradition, Khandar (marriage) is a profound spiritual union viewed as the merging of Shiva and Shakti. The rituals begin with the Devgon (purification and invocation of deities), followed by the Lagan, performed late at night around a sacred fire. A unique and beautiful hallmark of a Kashmiri wedding is the Posh Puza (flower worship), where the bride and groom are seated under a red shawl and showered with flowers by family members, honoring the divine presence within them.'
+    },
+    mekhal: {
+      title: 'Mekhal (Yagneopavit)',
+      subtitle: 'Sacred Thread ceremony during Uttarayana',
+      icon: '◈',
+      description: 'Mekhal, or Yagneopavit, is the sacred thread ceremony marking a young boy\'s initiation into spiritual education and the Brahmacharya stage of life. Traditionally held during the auspicious Uttarayana period, the ceremony involves the boy wearing a sanctified thread consisting of three strands representing the holy trinity. Key rituals include the Devgon, the whispered impartation of the Gayatri Mantra by the guru or father, and a symbolic Bhiksha (alms-begging) where the initiate asks for sustenance from relatives, signifying humility.'
+    },
+    kahnethar: {
+      title: 'Kahnethar (Purification & Namkaran)',
+      subtitle: 'Name-keeping and purification Muhurat',
+      icon: '✺',
+      description: 'Kahnethar is the traditional naming and purification ceremony, typically observed on the eleventh day after a child\'s birth. It marks the end of the initial period of ritual impurity (Sutak) for the family. A priest conducts a sacred fire ritual (Homa) to purify the home and invoke divine blessings for the newborn\'s health and longevity. During this ceremony, the child is formally given their name, elders bestow their blessings, and a protective thread is often tied to ward off negative energies.'
+    }
+  };
 
   const handleCalculate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
     setResult(null);
+    setIsAboutOpen(false);
 
+    // Front-end Validation: Prevent reversed dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (start > end) {
+      setError('Invalid Date Range: The Search Start Date cannot be after the Search End Date.');
+      return;
+    }
+
+    setLoading(true);
     const formData = new FormData(e.currentTarget);
     
     try {
@@ -22,86 +71,240 @@ export default function SaathCalculator() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event_type: formData.get('eventType'),
-          start_date: formData.get('startDate'),
-          end_date: formData.get('endDate'),
+          start_date: startDate,
+          end_date: endDate,
           config: {}
         }),
       });
       
       if (!response.ok) throw new Error('Network response was not ok');
-      const data = await response.json();
+      const data: CalculationResponse = await response.json();
       setResult(data);
     } catch (err) {
-      setError('Failed to connect to the planetary engine. Please try again.');
+      setError('Unable to reach the planetary engine. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const formatDisplayDate = (dateStr: string) => {
+    const d = new Date(dateStr + 'T00:00:00');
+    return {
+      weekday: d.toLocaleDateString('en-US', { weekday: 'long' }),
+      dayMonth: d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
+      year: d.toLocaleDateString('en-US', { year: 'numeric' })
+    };
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-3xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#FDFBF7] text-slate-800 selection:bg-amber-200 selection:text-amber-900 font-sans relative overflow-hidden">
+      <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-amber-400/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[30%] right-[-10%] w-[600px] h-[600px] bg-rose-400/5 rounded-full blur-[140px] pointer-events-none" />
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 relative z-10 space-y-12">
         
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Vijayshwar Saath Calculator</h1>
-          <p className="mt-3 text-lg text-slate-600">Determine traditional auspicious dates for Kashmiri ceremonies.</p>
-        </div>
+        <header className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 text-xs font-bold tracking-widest uppercase shadow-sm">
+            <span className="text-sm text-amber-600">ॐ</span> Vijayshwar Siddhanta Engine
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-serif font-bold tracking-tight text-slate-900">
+            Kashmiri Saath Calculator
+          </h1>
+          <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+            Dynamic Udaya-Tithi & Nakshatra calculations calibrated to Srinagar sunrise coordinates for sacred traditional rituals.
+          </p>
+        </header>
 
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-          <form onSubmit={handleCalculate} className="space-y-6">
+        <section className="bg-white border border-amber-100 rounded-3xl p-6 sm:p-10 shadow-xl shadow-amber-900/5 relative">
+          <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-amber-300 via-rose-400 to-amber-300 rounded-t-3xl" />
+
+          <form onSubmit={handleCalculate} className="space-y-8 mt-2">
             <div>
-              <label className="block text-sm font-medium text-slate-700">Ceremony Type</label>
-              <select name="eventType" className="mt-1 block w-full rounded-md border-slate-300 py-3 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm bg-slate-50 border">
-                <option value="khandar">Khandar (Marriage)</option>
-                <option value="mekhal">Mekhal (Yagneopavit)</option>
-                <option value="kahnethar">Kahnethar (Name-keeping)</option>
-              </select>
+              <label className="block text-xs uppercase tracking-widest font-bold text-slate-500 mb-2">
+                Select Ceremony
+              </label>
+              <div className="relative">
+                <select 
+                  name="eventType" 
+                  defaultValue="kahnethar"
+                  className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-semibold py-4 px-5 pr-10 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-sm"
+                >
+                  <option value="khandar">Khandar (Marriage Ceremony)</option>
+                  <option value="mekhal">Mekhal (Yagneopavit Ceremony)</option>
+                  <option value="kahnethar">Kahnethar (Name-keeping & Purification)</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-400">
+                  ▼
+                </div>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700">Search Start Date</label>
-                <input required type="date" name="startDate" className="mt-1 block w-full rounded-md border-slate-300 py-3 px-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-slate-50 border" />
+                <label className="block text-xs uppercase tracking-widest font-bold text-slate-500 mb-2">
+                  Window Start Date
+                </label>
+                <input 
+                  required 
+                  type="date" 
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-semibold py-3.5 px-5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-sm"
+                />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-slate-700">Search End Date</label>
-                <input required type="date" name="endDate" className="mt-1 block w-full rounded-md border-slate-300 py-3 px-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-slate-50 border" />
+                <label className="block text-xs uppercase tracking-widest font-bold text-slate-500 mb-2">
+                  Window End Date
+                </label>
+                <input 
+                  required 
+                  type="date" 
+                  value={endDate}
+                  min={startDate} // HTML5 validation: End date cannot be before Start date
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-semibold py-3.5 px-5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-sm"
+                />
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 transition-colors">
-              {loading ? 'Consulting Ephemeris...' : 'Find Auspicious Dates'}
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="w-full relative group overflow-hidden rounded-xl font-bold shadow-lg shadow-rose-900/10 transition-all duration-300 hover:shadow-rose-900/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:pointer-events-none"
+            >
+              <div className="relative px-6 py-4 bg-gradient-to-r from-amber-600 via-rose-600 to-amber-600 text-white flex items-center justify-center gap-3 tracking-wide">
+                {loading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Consulting Ephemeris...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Find Auspicious Saath</span>
+                    <span className="text-xl">→</span>
+                  </>
+                )}
+              </div>
             </button>
           </form>
-        </div>
+        </section>
 
         {error && (
-          <div className="p-4 bg-red-50 text-red-700 rounded-xl text-center border border-red-100">
+          <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm text-center font-medium shadow-sm">
             {error}
           </div>
         )}
 
         {result && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-slate-900">Calculated Results</h2>
+          <section className="space-y-6 pt-6">
+            
+            {/* Expandable About Section */}
+            <div className="bg-white border border-amber-100 rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
+              <button 
+                onClick={() => setIsAboutOpen(!isAboutOpen)}
+                className="w-full px-6 py-4 flex items-center justify-between bg-slate-50 hover:bg-amber-50/50 transition-colors"
+              >
+                <span className="font-semibold text-slate-800 flex items-center gap-2">
+                  <span className="text-rose-600 text-lg">{eventMetadata[result.event]?.icon}</span>
+                  About {eventMetadata[result.event]?.title.split(' ')[0]}
+                </span>
+                <span className={`text-slate-400 transition-transform duration-300 ${isAboutOpen ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              
+              <div className={`transition-all duration-300 ease-in-out ${isAboutOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="p-6 pt-2 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
+                  {eventMetadata[result.event]?.description}
+                </div>
+              </div>
+            </div>
+
+            {/* Results Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-5 gap-3 mt-8">
+              <div>
+                <h2 className="text-2xl font-serif font-bold text-slate-900 flex items-center gap-2">
+                  <span className="text-rose-600">{eventMetadata[result.event]?.icon || '❀'}</span>
+                  Auspicious Dates Found
+                </h2>
+                <p className="text-sm text-slate-500 mt-1 font-medium">
+                  Evaluated Window: <span className="text-slate-800">{result.range}</span>
+                </p>
+              </div>
+              <span className="self-start sm:self-auto inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-50 border border-emerald-200 text-emerald-700 uppercase tracking-wider">
+                {result.auspicious_days.length} Valid Dates
+              </span>
+            </div>
+
+            {/* Results Cards */}
             {result.auspicious_days.length === 0 ? (
-              <p className="text-slate-500 bg-white p-6 rounded-xl border border-slate-100 shadow-sm text-center">No auspicious dates found in this window.</p>
+              <div className="text-center py-12 bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+                <p className="text-slate-600 font-medium">
+                  No auspicious dates met all classical parameters for this ceremony during the selected window.
+                </p>
+                <p className="text-slate-500 text-sm mt-2">
+                  Consider expanding your search window or evaluating adjacent lunar cycles.
+                </p>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {result.auspicious_days.map((day: any, index: number) => (
-                  <div key={index} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                    <p className="text-lg font-semibold text-indigo-700">{new Date(day.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    <div className="mt-2 space-y-1">
-                      <p className="text-sm text-slate-600"><span className="font-medium text-slate-900">Tithi:</span> {day.tithi}</p>
-                      <p className="text-sm text-slate-600"><span className="font-medium text-slate-900">Nakshatra:</span> {day.nakshatra}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {result.auspicious_days.map((day, idx) => {
+                  const d = formatDisplayDate(day.date);
+                  return (
+                    <div 
+                      key={idx} 
+                      className="group bg-white border border-amber-100 hover:border-amber-300 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-amber-900/5 hover:-translate-y-1 relative overflow-hidden"
+                    >
+                      <div className="absolute -right-6 -top-6 text-amber-50 opacity-50 text-9xl pointer-events-none transform rotate-12">
+                        {eventMetadata[result.event]?.icon || '❀'}
+                      </div>
+
+                      <div className="flex items-start justify-between relative z-10">
+                        <div>
+                          <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
+                            {d.weekday}
+                          </span>
+                          <div className="flex items-baseline gap-2 mt-1">
+                            <span className="text-3xl font-serif font-bold text-slate-900 tracking-tight">
+                              {d.dayMonth}
+                            </span>
+                            <span className="text-base text-slate-500 font-medium">
+                              {d.year}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-sm font-bold shadow-sm">
+                          ✓
+                        </span>
+                      </div>
+
+                      <div className="mt-6 pt-5 border-t border-slate-100 grid grid-cols-2 gap-3 text-sm relative z-10">
+                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider block mb-1">Sunrise Tithi</span>
+                          <span className="font-semibold text-slate-800 block truncate">
+                            {day.tithi}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider block mb-1">Active Nakshatra</span>
+                          <span className="font-semibold text-slate-800 block truncate">
+                            {day.nakshatra}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
-          </div>
+          </section>
         )}
-      </div>
+
+      </main>
     </div>
   );
 }
