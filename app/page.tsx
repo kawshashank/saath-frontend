@@ -257,7 +257,8 @@ export default function SaathCalculator() {
                       key={idx} 
                       className="group bg-white border border-amber-100 hover:border-amber-300 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-amber-900/5 hover:-translate-y-1 relative overflow-hidden"
                     >
-                      <div className="absolute -right-6 -top-6 text-amber-50 opacity-50 text-9xl pointer-events-none transform rotate-12">
+                      {/* Darkened Star/Flower Watermark Background */}
+                      <div className="absolute -right-6 -top-6 text-amber-200 opacity-40 text-9xl pointer-events-none transform rotate-12">
                         {eventMetadata[result.event]?.icon || '❀'}
                       </div>
 
@@ -275,8 +276,8 @@ export default function SaathCalculator() {
                             </span>
                           </div>
                         </div>
-                        {/* Swastik Badge */}
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-base font-bold shadow-sm">
+                        {/* Restored Elegant Swastik Badge */}
+                        <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-rose-100 text-rose-700 border border-rose-300 text-lg font-extrabold shadow-md shadow-rose-200/50">
                           卐
                         </span>
                       </div>
