@@ -20,9 +20,10 @@ export default function SaathCalculator() {
   const [result, setResult] = useState<CalculationResponse | null>(null);
   const [error, setError] = useState('');
   
-  // Controlled states for real-time validation
-  const [startDate, setStartDate] = useState('2026-09-01');
-  const [endDate, setEndDate] = useState('2026-10-31');
+  const today = new Date().toISOString().split('T')[0];
+
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   const eventMetadata: Record<string, { title: string; subtitle: string; icon: string; description: string }> = {
@@ -52,7 +53,6 @@ export default function SaathCalculator() {
     setResult(null);
     setIsAboutOpen(false);
 
-    // Front-end Validation: Prevent reversed dates
     const start = new Date(startDate);
     const end = new Date(endDate);
     
@@ -105,7 +105,7 @@ export default function SaathCalculator() {
         
         <header className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 text-xs font-bold tracking-widest uppercase shadow-sm">
-            <span className="text-sm text-amber-600">ॐ</span> Vijayshwar Siddhanta Engine
+            <span className="text-sm text-amber-600">ॐ</span> Vedic Siddhanta Engine
           </div>
           <h1 className="text-4xl sm:text-5xl font-serif font-bold tracking-tight text-slate-900">
             Kashmiri Saath Calculator
@@ -148,6 +148,7 @@ export default function SaathCalculator() {
                   required 
                   type="date" 
                   value={startDate}
+                  min={today}
                   onChange={(e) => setStartDate(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-semibold py-3.5 px-5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-sm"
                 />
@@ -161,7 +162,7 @@ export default function SaathCalculator() {
                   required 
                   type="date" 
                   value={endDate}
-                  min={startDate} // HTML5 validation: End date cannot be before Start date
+                  min={startDate} 
                   onChange={(e) => setEndDate(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-semibold py-3.5 px-5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-sm"
                 />
@@ -202,7 +203,6 @@ export default function SaathCalculator() {
         {result && (
           <section className="space-y-6 pt-6">
             
-            {/* Expandable About Section */}
             <div className="bg-white border border-amber-100 rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
               <button 
                 onClick={() => setIsAboutOpen(!isAboutOpen)}
@@ -224,7 +224,6 @@ export default function SaathCalculator() {
               </div>
             </div>
 
-            {/* Results Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-5 gap-3 mt-8">
               <div>
                 <h2 className="text-2xl font-serif font-bold text-slate-900 flex items-center gap-2">
@@ -235,12 +234,11 @@ export default function SaathCalculator() {
                   Evaluated Window: <span className="text-slate-800">{result.range}</span>
                 </p>
               </div>
-              <span className="self-start sm:self-auto inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-50 border border-emerald-200 text-emerald-700 uppercase tracking-wider">
+              <span className="self-start sm:self-auto inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-amber-50 border border-amber-200 text-amber-700 uppercase tracking-wider">
                 {result.auspicious_days.length} Valid Dates
               </span>
             </div>
 
-            {/* Results Cards */}
             {result.auspicious_days.length === 0 ? (
               <div className="text-center py-12 bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
                 <p className="text-slate-600 font-medium">
@@ -277,8 +275,9 @@ export default function SaathCalculator() {
                             </span>
                           </div>
                         </div>
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-sm font-bold shadow-sm">
-                          ✓
+                        {/* Swastik Badge */}
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-base font-bold shadow-sm">
+                          卐
                         </span>
                       </div>
 
