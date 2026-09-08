@@ -20,9 +20,16 @@ export default function SaathCalculator() {
   const [result, setResult] = useState<CalculationResponse | null>(null);
   const [error, setError] = useState('');
   
-  const today = new Date().toISOString().split('T')[0];
+  // Calculate today's date for the default input value
+  const todayObj = new Date();
+  const defaultStart = todayObj.toISOString().split('T')[0];
+  
+  // Calculate exactly 3 years ago for the minimum allowed date
+  const pastObj = new Date(todayObj);
+  pastObj.setFullYear(todayObj.getFullYear() - 3);
+  const minAllowedDate = pastObj.toISOString().split('T')[0];
 
-  const [startDate, setStartDate] = useState(today);
+  const [startDate, setStartDate] = useState(defaultStart);
   const [endDate, setEndDate] = useState('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
@@ -148,7 +155,7 @@ export default function SaathCalculator() {
                   required 
                   type="date" 
                   value={startDate}
-                  min={today}
+                  min={minAllowedDate} // Now permits dates up to 3 years in the past
                   onChange={(e) => setStartDate(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-semibold py-3.5 px-5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-sm"
                 />
@@ -257,7 +264,6 @@ export default function SaathCalculator() {
                       key={idx} 
                       className="group bg-white border border-amber-100 hover:border-amber-300 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-amber-900/5 hover:-translate-y-1 relative overflow-hidden"
                     >
-                      {/* Darkened Star/Flower Watermark Background */}
                       <div className="absolute -right-6 -top-6 text-amber-200 opacity-40 text-9xl pointer-events-none transform rotate-12">
                         {eventMetadata[result.event]?.icon || '❀'}
                       </div>
@@ -276,7 +282,6 @@ export default function SaathCalculator() {
                             </span>
                           </div>
                         </div>
-                        {/* Restored Elegant Swastik Badge */}
                         <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-rose-100 text-rose-700 border border-rose-300 text-lg font-extrabold shadow-md shadow-rose-200/50">
                           卐
                         </span>
