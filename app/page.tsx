@@ -131,7 +131,7 @@ export default function SaathCalculator() {
             Kashmiri Saath Calculator
           </h1>
           <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
-            Dynamic Udaya-Tithi & Nakshatra calculations calibrated to Srinagar sunrise coordinates for sacred traditional rituals.
+            Your guide to auspicious Saath, rooted in Kashmir’s sacred calendar.
           </p>
         </header>
 
