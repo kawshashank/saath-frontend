@@ -28,17 +28,19 @@ export default function SaathCalculator() {
   const [isWaking, setIsWaking] = useState(false);
   const [result, setResult] = useState<CalculationResponse | null>(null);
   const [error, setError] = useState('');
+  const jantriStartDate = '2026-03-01';
+  const jantriEndDate = '2027-03-31';
   
   // Calculate today's date for the default input value
   const todayObj = new Date();
   const defaultStart = todayObj.toISOString().split('T')[0];
   
-  // Calculate exactly 3 years ago for the minimum allowed date
-  const pastObj = new Date(todayObj);
-  pastObj.setFullYear(todayObj.getFullYear() - 3);
-  const minAllowedDate = pastObj.toISOString().split('T')[0];
-
-  const [startDate, setStartDate] = useState(defaultStart);
+  const initialDate = defaultStart < jantriStartDate
+    ? jantriStartDate
+    : defaultStart > jantriEndDate
+      ? jantriEndDate
+      : defaultStart;
+  const [startDate, setStartDate] = useState(initialDate);
   const [endDate, setEndDate] = useState('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
@@ -168,7 +170,8 @@ export default function SaathCalculator() {
                   required 
                   type="date" 
                   value={startDate}
-                  min={minAllowedDate} // Now permits dates up to 3 years in the past
+                  min={jantriStartDate}
+                  max={jantriEndDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-semibold py-3.5 px-5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-sm"
                 />
@@ -183,6 +186,7 @@ export default function SaathCalculator() {
                   type="date" 
                   value={endDate}
                   min={startDate} 
+                  max={jantriEndDate}
                   onChange={(e) => setEndDate(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-semibold py-3.5 px-5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-sm"
                 />
