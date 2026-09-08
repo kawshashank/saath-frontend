@@ -7,7 +7,7 @@ interface AuspiciousDay {
   tithi: string;
   nakshatra: string;
   is_auspicious: boolean;
-  jantri_timing?: string;
+  timing?: string;
 }
 
 interface EmptyMonth {
@@ -20,8 +20,6 @@ interface CalculationResponse {
   event: string;
   range: string;
   auspicious_days: AuspiciousDay[];
-  source?: string;
-  coverage?: string;
   empty_months?: EmptyMonth[];
 }
 
@@ -250,11 +248,6 @@ export default function SaathCalculator() {
                 <p className="text-sm text-slate-500 mt-1 font-medium">
                   Evaluated Window: <span className="text-slate-800">{result.range}</span>
                 </p>
-                {result.source && (
-                  <p className="text-xs text-amber-700 mt-2 font-medium">
-                    Source: {result.source}{result.coverage ? ` · Coverage: ${result.coverage}` : ''}
-                  </p>
-                )}
               </div>
               <span className="self-start sm:self-auto inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-amber-50 border border-amber-200 text-amber-700 uppercase tracking-wider">
                 {result.auspicious_days.length} Valid Dates
@@ -319,10 +312,10 @@ export default function SaathCalculator() {
                           </span>
                         </div>
                       </div>
-                      {day.jantri_timing && (
+                      {day.timing && (
                         <div className="mt-3 rounded-xl bg-amber-50 p-3 border border-amber-100 text-sm relative z-10">
-                          <span className="text-amber-700 text-xs font-bold uppercase tracking-wider block mb-1">Jantri timing (as printed)</span>
-                          <span className="font-semibold text-amber-900">{day.jantri_timing}</span>
+                          <span className="text-amber-700 text-xs font-bold uppercase tracking-wider block mb-1">Timing</span>
+                          <span className="font-semibold text-amber-900">{day.timing}</span>
                         </div>
                       )}
                     </div>
