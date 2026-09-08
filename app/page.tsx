@@ -25,6 +25,7 @@ interface CalculationResponse {
 
 export default function SaathCalculator() {
   const [loading, setLoading] = useState(false);
+  const [isWaking, setIsWaking] = useState(false);
   const [result, setResult] = useState<CalculationResponse | null>(null);
   const [error, setError] = useState('');
   
@@ -67,6 +68,7 @@ export default function SaathCalculator() {
     setError('');
     setResult(null);
     setIsAboutOpen(false);
+    setIsWaking(false);
 
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -77,6 +79,7 @@ export default function SaathCalculator() {
     }
 
     setLoading(true);
+    const wakeTimer = window.setTimeout(() => setIsWaking(true), 3500);
     const formData = new FormData(e.currentTarget);
     
     try {
@@ -96,8 +99,10 @@ export default function SaathCalculator() {
       const data: CalculationResponse = await response.json();
       setResult(data);
     } catch {
-      setError('Unable to reach the planetary engine. Please check your connection and try again.');
+      setError('The Digital Pandit could not be reached. Please check your connection and try again in a moment.');
     } finally {
+      window.clearTimeout(wakeTimer);
+      setIsWaking(false);
       setLoading(false);
     }
   };
@@ -207,6 +212,15 @@ export default function SaathCalculator() {
               </div>
             </button>
           </form>
+
+          {isWaking && (
+            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-center shadow-sm">
+              <p className="text-sm leading-relaxed text-amber-800">
+                Since we don&apos;t charge Dakshina for this digital Jantri, our servers like to take naps to save energy.
+                Our digital pandit is currently waking up, stretching, and finding his glasses. Please give him 15–20 seconds to do the math!
+              </p>
+            </div>
+          )}
         </section>
 
         {error && (
