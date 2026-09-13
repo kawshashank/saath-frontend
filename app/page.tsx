@@ -62,6 +62,24 @@ export default function SaathCalculator() {
       subtitle: 'Name-keeping and purification Muhurat',
       icon: '✺',
       description: 'Kahnethar is the traditional naming and purification ceremony, typically observed on the eleventh day after a child\'s birth. It marks the end of the initial period of ritual impurity (Sutak) for the family. A priest conducts a sacred fire ritual (Homa) to purify the home and invoke divine blessings for the newborn\'s health and longevity. During this ceremony, the child is formally given their name, elders bestow their blessings, and a protective thread is often tied to ward off negative energies.'
+    },
+    shishur: {
+      title: 'Shishur Laganuk Saath',
+      subtitle: 'Winter Preparation Ceremony',
+      icon: '❄️',
+      description: 'Shishur Laganuk is a traditional Kashmiri ceremony performed for a new bride or a newborn child during their first winter. It marks the onset of the harsh winter (Chilla-i-Kalan) and involves prayers and rituals to seek divine protection from the severe cold. Family members gather to celebrate, and a special garment or pouch containing auspicious items (Shishur) is often tied or presented to ensure warmth, health, and well-being throughout the season.'
+    },
+    gandan: {
+      title: 'Gandan Saath',
+      subtitle: 'Engagement Ceremony',
+      icon: '💍',
+      description: 'Gandan is the formal engagement ceremony in the Kashmiri Pandit tradition, marking the commitment between two families. It is an occasion of joy and mutual acceptance, where the families exchange gifts, sweets, and tokens of goodwill. A priest conducts a brief puja to bless the couple and their future union, setting the foundation for the upcoming wedding festivities and finalizing the alliance with divine blessings.'
+    },
+    pravesh: {
+      title: 'Pravesh Muhurat',
+      subtitle: 'Housewarming / New House',
+      icon: '🏠',
+      description: 'Pravesh, or Navis Makanas Achunuk, is the auspicious housewarming ceremony performed before entering and occupying a newly built or purchased home. A priest conducts a Navagraha and Vastu Shanti puja to purify the space, appease the household deities, and ward off any negative energies. Family and friends are invited to partake in a traditional feast, bringing prosperity, peace, and positive vibrations into the new dwelling.'
     }
   };
 
@@ -154,6 +172,9 @@ export default function SaathCalculator() {
                   <option value="khandar">Khandar (Marriage Ceremony)</option>
                   <option value="mekhal">Mekhal (Yagneopavit Ceremony)</option>
                   <option value="kahnethar">Kahnethar (Name-keeping & Purification)</option>
+                  <option value="shishur">Shishur Laganuk (Winter Preparation Ceremony)</option>
+                  <option value="gandan">Gandan (Engagement Ceremony)</option>
+                  <option value="pravesh">Pravesh (Housewarming / New House)</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-400">
                   ▼
