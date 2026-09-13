@@ -333,7 +333,7 @@ export default function SaathCalculator() {
                       {day.timing && (
                         <div className="mt-3 rounded-xl bg-amber-50 p-3 border border-amber-100 text-sm relative z-10">
                           <span className="text-amber-700 text-xs font-bold uppercase tracking-wider block mb-1">Timing</span>
-                          <span className="font-semibold text-amber-900">{day.timing}</span>
+                          <span className="font-semibold text-amber-900 whitespace-pre-line">{day.timing}</span>
                         </div>
                       )}
                     </div>
