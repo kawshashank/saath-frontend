@@ -151,7 +151,7 @@ export default function SaathCalculator() {
                   defaultValue="kahnethar"
                   className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-semibold py-4 px-5 pr-10 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-sm"
                 >
-                  <option value="khandar" disabled>Khandar (Marriage Ceremony) — Coming soon</option>
+                  <option value="khandar">Khandar (Marriage Ceremony)</option>
                   <option value="mekhal" disabled>Mekhal (Yagneopavit Ceremony) — Coming soon</option>
                   <option value="kahnethar">Kahnethar (Name-keeping & Purification)</option>
                 </select>
