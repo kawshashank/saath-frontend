@@ -44,6 +44,31 @@ export default function SaathCalculator() {
   const [endDate, setEndDate] = useState('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [feedbackType, setFeedbackType] = useState('general');
+  const APP_URL = "https://kashmiri-saath.vercel.app"; 
+
+  const handleFeedbackSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('fb_email');
+    if (!email) {
+      alert("⚠️ Please provide your email address.");
+      return;
+    }
+    let subject = feedbackType === "bug" ? "Bug Report: Saath Calculator" : "Feedback: Saath Calculator";
+    let body = `User Email: ${email}\n\n`;
+    if (feedbackType === "bug") {
+      body += `--- BUG REPORT ---\nIssue Type: ${formData.get('fb_dob')}\nExpected: ${formData.get('fb_expected')}\nApp Result: ${formData.get('fb_actual')}\nNotes: ${formData.get('fb_notes')}`;
+    } else {
+      body += `--- FEEDBACK ---\n${formData.get('fb_text')}`;
+    }
+    window.location.href = `mailto:kawshashank@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setIsFeedbackOpen(false);
+  };
+
+
   const eventMetadata: Record<string, { title: string; subtitle: string; icon: string; description: string }> = {
     khandar: {
       title: 'Khandar (Marriage)',
@@ -138,6 +163,115 @@ export default function SaathCalculator() {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-slate-800 selection:bg-amber-200 selection:text-amber-900 font-sans relative overflow-hidden">
+
+      {/* Custom CSS for Animations */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes subtleFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        .anim-fade-up { animation: subtleFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-slide-right { animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .modal-scroll::-webkit-scrollbar { width: 6px; }
+        .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+      `}} />
+
+      {/* --- Floating Back to Hub Button (Top Right) --- */}
+      <a 
+        href="https://vitastahub.vercel.app/" 
+        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[55] flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-md border border-stone-200/80 rounded-full shadow-sm text-[10px] sm:text-xs font-bold uppercase tracking-widest text-stone-500 hover:text-amber-800 hover:bg-white hover:shadow-md hover:-translate-x-0.5 transition-all"
+      >
+        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span className="hidden sm:inline">Vitasta Hub</span>
+        <span className="sm:hidden">Hub</span>
+      </a>
+
+      {/* --- Welcome Modal --- */}
+      {showWelcome && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-stone-900/70 backdrop-blur-md p-4 transition-all duration-500 h-[100dvh]">
+          <div className="bg-white/95 backdrop-blur-xl w-full max-w-xl rounded-[2rem] shadow-2xl overflow-hidden anim-fade-up border border-white/40 flex flex-col max-h-[85dvh]">
+            <div className="bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 p-6 sm:p-10 text-center relative overflow-hidden shrink-0">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-amber-200 via-transparent to-transparent"></div>
+              <div className="relative z-10">
+                <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] font-semibold text-amber-100/80 mb-2 sm:mb-3 block">
+                  Vijayshwar Jantri Aligned
+                </span>
+                <h2 className="text-2xl sm:text-4xl font-serif font-bold text-white pb-1">
+                  Welcome to the Saath Calculator
+                </h2>
+              </div>
+            </div>
+            
+            <div className="p-6 sm:p-10 space-y-6 sm:space-y-8 overflow-y-auto modal-scroll flex-1">
+              <p className="text-stone-600 text-sm sm:text-base leading-relaxed text-center">
+                Discover the authentic traditional Kashmiri auspicious timings (Saath/Muhurat) for your most sacred family events.
+              </p>
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 border-b border-stone-100 pb-2 text-center">Features Overview</h3>
+                <ul className="space-y-4 text-sm text-stone-700">
+                  <li className="flex items-start"><span className="text-amber-700 text-lg mr-3 leading-none">✨</span><span><strong>Accurate Alignments:</strong> Maps completely to the published Vijayshwar Jantri (2026-27).</span></li>
+                  <li className="flex items-start"><span className="text-amber-700 text-lg mr-3 leading-none">📅</span><span><strong>Multiple Ceremonies:</strong> Instantly check dates for Marriage, Yagneopavit, Namkaran, Housewarming, and more.</span></li>
+                  <li className="flex items-start"><span className="text-amber-700 text-lg mr-3 leading-none">🌟</span><span><strong>Precise Timings:</strong> View exact Lagnas and time segments for all supported events directly on your screen.</span></li>
+                </ul>
+              </div>
+            </div>
+            <div className="p-6 sm:px-10 sm:pb-10 pt-2 shrink-0 bg-white/95">
+              <button onClick={() => setShowWelcome(false)} className="w-full bg-gradient-to-r from-amber-700 to-amber-900 text-amber-50 font-semibold tracking-wide py-4 rounded-2xl shadow-[0_8px_20px_rgb(217,119,6,0.25)] hover:shadow-[0_8px_25px_rgb(217,119,6,0.35)] hover:-translate-y-0.5 transition-all">
+                Enter Calculator
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- Feedback Modal --- */}
+      {isFeedbackOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 backdrop-blur-md p-4 transition-all duration-500 h-[100dvh]">
+          <div className="bg-white/90 backdrop-blur-xl w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden anim-fade-up border border-white/40 flex flex-col max-h-[85dvh]">
+            <div className="flex justify-between items-center p-6 border-b border-stone-200/50 shrink-0">
+              <h3 className="font-serif font-bold text-xl text-stone-800 tracking-wide">Support & Feedback</h3>
+              <button onClick={() => setIsFeedbackOpen(false)} className="text-stone-400 hover:text-rose-700 text-3xl leading-none transition-colors">&times;</button>
+            </div>
+            <form onSubmit={handleFeedbackSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 sm:p-8 space-y-5 overflow-y-auto modal-scroll flex-1">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-3">What would you like to share?</label>
+                  <div className="flex flex-col space-y-3">
+                    <label className="flex items-center space-x-3 text-sm cursor-pointer group"><input type="radio" name="fb_type_group" value="general" checked={feedbackType === 'general'} onChange={() => setFeedbackType('general')} className="w-4 h-4 accent-amber-700" /><span className="group-hover:text-amber-800 transition-colors font-medium">General Feedback / Suggestion</span></label>
+                    <label className="flex items-center space-x-3 text-sm cursor-pointer group"><input type="radio" name="fb_type_group" value="bug" checked={feedbackType === 'bug'} onChange={() => setFeedbackType('bug')} className="w-4 h-4 accent-amber-700" /><span className="group-hover:text-amber-800 transition-colors font-medium">Report an Issue</span></label>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">Your Email Address</label>
+                  <input type="email" name="fb_email" placeholder="name@example.com" className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all outline-none" required />
+                </div>
+                {feedbackType === 'bug' ? (
+                  <div className="space-y-4 anim-fade-up">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">Issue Type</label><input type="text" name="fb_dob" placeholder="e.g., Missing Date" className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 transition-all outline-none" /></div>
+                      <div><label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">Expected</label><input type="text" name="fb_expected" placeholder="e.g., 10 Feb" className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 transition-all outline-none" /></div>
+                    </div>
+                    <div><label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">App Result</label><input type="text" name="fb_actual" placeholder="e.g., Not Found" className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 transition-all outline-none" /></div>
+                    <div><label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">Notes</label><textarea name="fb_notes" rows={2} className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 transition-all outline-none resize-none"></textarea></div>
+                  </div>
+                ) : (
+                  <div className="anim-fade-up">
+                    <label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">Your Thoughts</label>
+                    <textarea name="fb_text" rows={4} className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 transition-all outline-none resize-none"></textarea>
+                  </div>
+                )}
+              </div>
+              <div className="p-6 sm:px-8 sm:pb-8 pt-2 shrink-0 bg-white/90 border-t border-stone-100">
+                <button type="submit" className="w-full bg-amber-800 hover:bg-amber-900 text-amber-50 font-semibold tracking-wide py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98]">
+                  Send Message
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-amber-400/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-[30%] right-[-10%] w-[600px] h-[600px] bg-rose-400/5 rounded-full blur-[140px] pointer-events-none" />
 
