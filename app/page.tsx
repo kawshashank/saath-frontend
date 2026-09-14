@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface AuspiciousDay {
   date: string;
@@ -47,6 +47,14 @@ export default function SaathCalculator() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedbackType, setFeedbackType] = useState('general');
+  
+  // Wake up the backend on page load
+  useEffect(() => {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (backendUrl) {
+      fetch(`${backendUrl}/api/v1/calculate`, { method: 'OPTIONS' }).catch(() => {});
+    }
+  }, []);
   const APP_URL = "https://kashmiri-saath.vercel.app"; 
 
   const handleFeedbackSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -249,7 +257,7 @@ export default function SaathCalculator() {
                 {feedbackType === 'bug' ? (
                   <div className="space-y-4 anim-fade-up">
                     <div className="grid grid-cols-2 gap-4">
-                      <div><label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">Issue Type</label><input type="text" name="fb_dob" placeholder="e.g., Missing Date" className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 transition-all outline-none" /></div>
+                      <div><label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">Ceremony Name</label><input type="text" name="fb_dob" placeholder="e.g., Khandar" className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 transition-all outline-none" /></div>
                       <div><label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">Expected</label><input type="text" name="fb_expected" placeholder="e.g., 10 Feb" className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 transition-all outline-none" /></div>
                     </div>
                     <div><label className="block text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">App Result</label><input type="text" name="fb_actual" placeholder="e.g., Not Found" className="w-full bg-stone-50/50 border border-stone-200 p-3 rounded-xl focus:ring-2 focus:ring-amber-500/50 transition-all outline-none" /></div>
@@ -348,10 +356,11 @@ export default function SaathCalculator() {
               </div>
             </div>
 
+            <div className="flex flex-col sm:flex-row gap-4">
             <button 
               type="submit" 
               disabled={loading} 
-              className="w-full relative group overflow-hidden rounded-xl font-bold shadow-lg shadow-rose-900/10 transition-all duration-300 hover:shadow-rose-900/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:pointer-events-none"
+              className="flex-1 relative group overflow-hidden rounded-xl font-bold shadow-lg shadow-rose-900/10 transition-all duration-300 hover:shadow-rose-900/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:pointer-events-none"
             >
               <div className="relative px-6 py-4 bg-gradient-to-r from-amber-600 via-rose-600 to-amber-600 text-white flex items-center justify-center gap-3 tracking-wide">
                 {loading ? (
@@ -360,7 +369,7 @@ export default function SaathCalculator() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>Consulting Ephemeris...</span>
+                    <span>Finding Auspicious Dates...</span>
                   </>
                 ) : (
                   <>
@@ -370,6 +379,10 @@ export default function SaathCalculator() {
                 )}
               </div>
             </button>
+            <button type="button" onClick={() => setIsFeedbackOpen(true)} className="px-6 py-4 rounded-xl font-bold border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50 transition-all whitespace-nowrap">
+              Feedback
+            </button>
+            </div>
           </form>
 
           {isWaking && (
@@ -528,9 +541,7 @@ export default function SaathCalculator() {
             <p className="text-stone-400 text-[10px] tracking-[0.1em] uppercase font-bold">🔒 Privacy First: Runs safely in your browser.</p>
             <p className="text-stone-400 text-[10px] tracking-[0.1em] uppercase font-bold">Built by Shashank Kaw</p>
           </div>
-          <button type="button" onClick={() => setIsFeedbackOpen(true)} className="w-full max-w-[200px] mt-2 bg-white border border-stone-200 text-stone-600 font-medium py-3 px-6 rounded-2xl shadow-sm hover:bg-stone-50 hover:text-stone-900 transition-all text-sm">
-            Provide Feedback
-          </button>
+
         </div>
 
       </main>
