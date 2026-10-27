@@ -47,14 +47,110 @@ export default function SaathCalculator() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedbackType, setFeedbackType] = useState('general');
+  const [hubUser, setHubUser] = useState<string | null>(null);
+  const [hubOrigin, setHubOrigin] = useState('https://vitastahub.vercel.app');
   
-  // Wake up the backend on page load
+  // Wake up the backend on page load & sync Hub session
   useEffect(() => {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (backendUrl) {
       fetch(`${backendUrl}/api/v1/calculate`, { method: 'OPTIONS' }).catch(() => {});
     }
+
+    const proxied = window.location.pathname.startsWith('/saath');
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const resolvedHubOrigin = proxied ? '' : (isLocal ? 'http://localhost:3000' : 'https://vitastahub.vercel.app');
+    setHubOrigin(resolvedHubOrigin);
+
+    const params = new URLSearchParams(window.location.search);
+    const userParam = params.get('hub_user');
+    if (userParam) {
+      setHubUser(userParam);
+    }
+
+    fetch(`${resolvedHubOrigin}/api/hub-session`, { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((sessionData) => {
+        if (sessionData?.authenticated && sessionData?.user) {
+          setHubUser(sessionData.user.firstName || sessionData.user.name || 'Member');
+        } else if (sessionData && !sessionData.authenticated) {
+          setHubUser(null);
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  // --- 1-Hour Inactivity & Single-Session Auto-Logout for Hub Session ---
+  useEffect(() => {
+    if (!hubUser) return;
+    const INACTIVITY_LIMIT_MS = 60 * 60 * 1000; // 1 hour
+    const ACTIVITY_KEY = 'vitasta_last_activity';
+    let lastActive = Date.now();
+    try {
+      localStorage.setItem(ACTIVITY_KEY, String(lastActive));
+    } catch {}
+
+    const triggerLogout = () => {
+      setHubUser(null);
+      try {
+        localStorage.removeItem(ACTIVITY_KEY);
+      } catch {}
+      window.location.href = `${hubOrigin}/logout`;
+    };
+
+    const onActivity = () => {
+      const now = Date.now();
+      if (now - lastActive >= INACTIVITY_LIMIT_MS) {
+        triggerLogout();
+        return;
+      }
+      if (now - lastActive > 10_000) {
+        lastActive = now;
+        try {
+          localStorage.setItem(ACTIVITY_KEY, String(now));
+        } catch {}
+      }
+    };
+
+    const checkIdle = () => {
+      const now = Date.now();
+      let storedLast = lastActive;
+      try {
+        const stored = localStorage.getItem(ACTIVITY_KEY);
+        if (stored) storedLast = Math.max(lastActive, Number(stored));
+      } catch {}
+      if (now - storedLast >= INACTIVITY_LIMIT_MS) {
+        triggerLogout();
+        return;
+      }
+      if (document.visibilityState === 'visible') {
+        fetch(`${hubOrigin}/api/hub-session`, { credentials: 'include' })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((sData) => {
+            if (sData?.invalidated) {
+              triggerLogout();
+            }
+          })
+          .catch(() => {});
+      }
+    };
+
+    const onVisChange = () => {
+      if (document.visibilityState === 'visible') checkIdle();
+    };
+
+    const events = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
+    events.forEach((evt) => window.addEventListener(evt, onActivity, { passive: true }));
+    document.addEventListener('visibilitychange', onVisChange);
+    const timer = window.setInterval(checkIdle, 30_000);
+
+    return () => {
+      events.forEach((evt) => window.removeEventListener(evt, onActivity));
+      document.removeEventListener('visibilitychange', onVisChange);
+      window.clearInterval(timer);
+    };
+  }, [hubUser, hubOrigin]);
+
   const APP_URL = "https://kashmiri-saath.vercel.app"; 
 
   const handleFeedbackSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -183,17 +279,34 @@ export default function SaathCalculator() {
         .modal-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
       `}} />
 
-      {/* --- Floating Back to Hub Button (Top Right) --- */}
-      <a 
-        href="https://vitastahub.vercel.app/" 
-        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[55] flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-md border border-stone-200/80 rounded-full shadow-sm text-[10px] sm:text-xs font-bold uppercase tracking-widest text-stone-500 hover:text-amber-800 hover:bg-white hover:shadow-md hover:-translate-x-0.5 transition-all"
-      >
-        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        <span className="hidden sm:inline">Vitasta Hub</span>
-        <span className="sm:hidden">Hub</span>
-      </a>
+      {/* --- Floating Top-Right Bar: Back to Hub + Logged-in User Status (Only if Logged In) --- */}
+      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[55] flex items-center gap-2">
+        {hubUser && (
+          <div className="flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 bg-white/95 backdrop-blur-md border border-amber-200/90 rounded-full shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] sm:text-xs font-bold text-stone-700 max-w-[100px] sm:max-w-[140px] truncate">
+              {hubUser}
+            </span>
+            <a
+              href={`${hubOrigin}/logout`}
+              className="ml-1 px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-bold uppercase tracking-wider transition-colors"
+              title="Sign out from Vitasta Hub & all calculators"
+            >
+              Logout
+            </a>
+          </div>
+        )}
+        <a 
+          href={`${hubOrigin}/`} 
+          className="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-md border border-stone-200/80 rounded-full shadow-sm text-[10px] sm:text-xs font-bold uppercase tracking-widest text-stone-500 hover:text-amber-800 hover:bg-white hover:shadow-md hover:-translate-x-0.5 transition-all"
+        >
+          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="hidden sm:inline">Vitasta Hub</span>
+          <span className="sm:hidden">Hub</span>
+        </a>
+      </div>
 
       {/* --- Welcome Modal --- */}
       {showWelcome && (
