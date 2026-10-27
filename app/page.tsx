@@ -72,7 +72,7 @@ export default function SaathCalculator() {
     } else {
       body += `--- FEEDBACK ---\n${formData.get('fb_text')}`;
     }
-    window.location.href = `mailto:kawshashank@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:vitastahub@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setIsFeedbackOpen(false);
   };
 
